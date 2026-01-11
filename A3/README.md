@@ -114,6 +114,9 @@ Below are some iterations of the canopy design.
 | Trunk radius | 0.3 | 0.3 | 0.3 |
 | Branch reduction | 0.5 | 0.5 | 0.5 |
 
+The three design variants are generated using the same global random seed to ensure reproducibility.  
+Variations are produced by changing surface resolution, heightmap parameters, panel opening thresholds, and recursive branching depth.
+
 ### Design A
 
 **Design A** Variation with a canopy with lower surface frequency and evenly spaced supports.
