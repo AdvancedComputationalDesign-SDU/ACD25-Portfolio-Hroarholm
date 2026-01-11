@@ -1,7 +1,7 @@
 """
 Assignment 2: Fractal Generator
 
-Author: Your Name
+Author: Hroar Holm Bertelsen
 
 Description:
 This script generates fractal patterns using recursive functions and geometric transformations.
@@ -10,78 +10,150 @@ This script generates fractal patterns using recursive functions and geometric t
 # Import necessary libraries
 import math
 import matplotlib.pyplot as plt
-from shapely.geometry import LineString
+from shapely.geometry import LineString, MultiLineString, Point
 from shapely.affinity import rotate, translate
+from shapely.affinity import scale, translate, rotate
+from shapely.geometry import box  
 import random
 
-# Global list to store all line segments
-line_list = []
 
-def generate_fractal(start_point, angle, length, depth, max_depth, angle_change, length_scaling_factor):
-    """
-    Recursive function to generate fractal patterns.
+"""---Parameters for this run"""
+SEED = 28
+iterations = 5     # L-system depth
+ANGLE = 45          # turning angle
+STEP = 6            # step length
+INFLUENCES = ['attractor', 'obstacle']
 
-    Parameters:
-    - start_point: Tuple (x, y), starting coordinate.
-    - angle: Float, current angle in degrees.
-    - length: Float, length of the current line segment.
-    - depth: Int, current recursion depth.
-    - max_depth: Int, maximum recursion depth.
-    - angle_change: Float, angle change at each recursion.
-    - length_scaling_factor: Float, scaling factor for the length.
-    """
-    if depth > max_depth:
-        return
+random.seed(SEED)
 
-    # Calculate the end point of the line segment
-    end_x = start_point[0] + length * math.cos(math.radians(angle))
-    end_y = start_point[1] + length * math.sin(math.radians(angle))
-    end_point = (end_x, end_y)
+"--- Define constraint box ---"
+constraint_box = box(50, 225, 75, 240)  
 
-    # Create a line segment using Shapely
-    line = LineString([start_point, end_point])
-    line_list.append(line)
 
-    # Update the length for the next recursion
-    new_length = length * length_scaling_factor
+"--- L-system definition ---"
+def apply_rules(ch):
+    if ch == 'X':
+        return "F+[[X]-X]-F[-FX]+X"
+    elif ch == 'F':
+        return "FF"
+    else:
+        return ch
 
-    # Increment depth
-    next_depth = depth + 1
+def process_string(s):
+    return ''.join(apply_rules(ch) for ch in s)
 
-    # Recursive calls for branches
-    generate_fractal(end_point, angle + angle_change, new_length, next_depth, max_depth, angle_change, length_scaling_factor)
-    generate_fractal(end_point, angle - angle_change, new_length, next_depth, max_depth, angle_change, length_scaling_factor)
+def create_l_system(iterations, axiom):
+    result = axiom
+    for _ in range(iterations):
+        result = process_string(result)
+    return result
 
-# Main execution
-if __name__ == "__main__":
-    # Parameters
-    start_point = (0, 0)
-    initial_angle = 90
-    initial_length = 100
-    recursion_depth = 0
-    max_recursion_depth = 5
-    angle_change = 30
-    length_scaling_factor = 0.7
+"--- Return a new heading slightly adjusted toward the attractor point.--- "
+def steer_toward_attractor(x, y, heading, attractor, strength=0.1):
+    ax, ay = attractor
+    dx, dy = ax - x, ay - y
+    target_angle = math.degrees(math.atan2(dy, dx))
+    diff = (target_angle - heading + 540) % 360 - 180  # shortest signed rotation
+    return heading + diff * strength
 
-    # Clear the line list
-    line_list.clear()
+"--- Draw the L-system into Shapely geometry ---"
+def draw_l_system_shapely(instructions, angle=ANGLE, step=STEP):
+    attractor = (100,300)
+    attract_strength = 0.05
+    stack = []
+    x, y = 0.0, 0.0
+    heading = 90.0  # start pointing up
+    lines = []
+    stem_ids = []
+    current_stem = 0
+    color_map = {0: (0, 0.6, 0)}  # base stem color
 
-    # Generate the fractal
-    generate_fractal(start_point, initial_angle, initial_length, recursion_depth, max_recursion_depth, angle_change, length_scaling_factor)
 
-    # Visualization
-    fig, ax = plt.subplots()
-    for line in line_list:
-        x, y = line.xy
-        ax.plot(x, y, color='green', linewidth=1)
+    for cmd in instructions:
+        if cmd == 'F':
+            # slightly steer toward an attractor point
+             if attractor is not None:
+                heading = steer_toward_attractor(x, y, heading, attractor, attract_strength)
 
-    # Optional: Customize the plot
-    ax.set_aspect('equal')
-    plt.axis('off')
-    plt.show()
+                # compute endpoint
+                rad = math.radians(heading)
+                step_variation = step * random.uniform(0.85, 1.15)
+                x2 = x + step_variation * math.cos(rad)
+                y2 = y + step_variation * math.sin(rad)
 
-    # Save the figure
-    fig.savefig('images/fractal_tree.png', dpi=300, bbox_inches='tight')
 
-    # Repeat the process with different parameters for additional fractals
-    # ...
+                # Check if the new line intersects the constraint box
+                candidate_line = LineString([(x, y), (x2, y2)])
+                if not candidate_line.intersects(constraint_box):
+                    lines.append(candidate_line)
+                    stem_ids.append(current_stem)
+                    x, y = x2, y2
+                else:
+
+                    continue
+
+        elif cmd == '+':
+            heading -= angle + random.uniform(-2,2)  # add slight randomness
+        elif cmd == '-':
+            heading += angle + random.uniform(-2,2) 
+        elif cmd == '[':
+            stack.append((x, y, heading, current_stem))
+            current_stem += 1
+            # Assign color for new stem
+            color_map[current_stem] = (0, 0.4 + random.uniform(0.2, 0.6), 0)
+        elif cmd == ']':
+            x, y, heading, current_stem = stack.pop()
+    return MultiLineString(lines), stem_ids, color_map
+
+
+"--- Generate ---"
+axiom = "X"
+angle = ANGLE
+step = STEP
+
+instructions = create_l_system(iterations, axiom)
+attractor = (100,325)
+attract_strength = 0.08
+
+
+geometry, stem_ids, color_map = draw_l_system_shapely(instructions, angle, step)
+
+"--- Apply transformations ---"
+geometry = scale(geometry, xfact=1, yfact=1)
+
+
+"--- Visualization with Matplotlib including Attractor ---"
+fig, ax = plt.subplots(figsize=(8, 8))
+num_lines = len(geometry.geoms)
+for line, stem_id in zip(geometry.geoms, stem_ids):
+    x, y = line.xy
+    color = color_map.get(stem_id, (0, 0.6, 0))  # default green
+    ax.plot(x, y, color=color, linewidth=1.2)
+
+"---Draw forbidden box---"
+x_min, y_min, x_max, y_max = constraint_box.bounds
+ax.add_patch(plt.Rectangle((x_min, y_min),
+                           x_max - x_min,
+                           y_max - y_min,
+                           color='red', alpha=0.3, label='Forbidden zone'))
+
+
+
+"""--- Draw attractor point ---"""
+ax.plot(attractor[0], attractor[1], 'yo', markersize=8, label='Attractor')
+ax.set_aspect("equal", "datalim")
+ax.axis("off")
+
+"""--- Final clean export ---"""
+ax.set_aspect("equal", adjustable="box")
+ax.axis("off")
+plt.margins(0)
+
+"""---Ensure output folder exists---"""
+import os
+print("Current working directory:", os.getcwd())
+os.makedirs("images", exist_ok=True)
+
+"""---Save tightly cropped, high-resolution image--"""
+plt.savefig("images/fractal_output.png", bbox_inches="tight", pad_inches=0, dpi=300)
+plt.close(fig)
