@@ -124,16 +124,32 @@ ax.plot(attractor[0], attractor[1], 'yo', markersize=8, label='Attractor')
 ax.set_aspect("equal", "datalim")
 ax.axis("off")
 
+# --- Expand plot bounds to avoid cropping attractor ---
+xmin, xmax = ax.get_xlim()
+ymin, ymax = ax.get_ylim()
+
+padding = 1  # padding space 
+ax.set_xlim(xmin, xmax)
+ax.set_ylim(ymin, ymax + padding)
+
 # --- Final clean export ---
 ax.set_aspect("equal", adjustable="box")
 ax.axis("off")
 plt.margins(0)
 
-# ---Ensure output folder exists ---
+# --- Resolve paths relative to this script ---
 import os
-print("Current working directory:", os.getcwd())
-os.makedirs("images", exist_ok=True)
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+IMAGES_DIR = os.path.join(BASE_DIR, "images")
+
+# Ensure images folder exists
+os.makedirs(IMAGES_DIR, exist_ok=True)
 
 # ---Save tightly cropped, high-resolution image ---
-plt.savefig("images/fractal_output.png", bbox_inches="tight", pad_inches=0, dpi=300)
+plt.savefig(
+    os.path.join(IMAGES_DIR, "fractal_output.png"),
+    bbox_inches="tight",
+    pad_inches=0,
+    dpi=300
+)
 plt.close(fig)
