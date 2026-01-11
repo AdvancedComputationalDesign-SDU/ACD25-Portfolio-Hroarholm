@@ -6,18 +6,19 @@ Author: Hroar Holm Bertelsen
 Description:
 This script generates fractal patterns using recursive functions and geometric transformations.
 """
-
-# Import necessary libraries
+# ----------------------------------------------------------------
+# Imports
+# ----------------------------------------------------------------
 import math
 import matplotlib.pyplot as plt
 from shapely.geometry import LineString, MultiLineString, Point
-from shapely.affinity import rotate, translate
 from shapely.affinity import scale, translate, rotate
 from shapely.geometry import box  
 import random
 
-
-"""---Parameters for this run"""
+# ----------------------------------------------------------------
+# Parameters
+# ----------------------------------------------------------------
 SEED = 28
 iterations = 5     # L-system depth
 ANGLE = 45          # turning angle
@@ -26,6 +27,10 @@ INFLUENCES = ['attractor', 'obstacle']
 
 random.seed(SEED)
 
+
+# ----------------------------------------------------------------
+# Helper functions
+# ----------------------------------------------------------------
 "--- Define constraint box ---"
 constraint_box = box(50, 225, 75, 240)  
 
@@ -56,7 +61,9 @@ def steer_toward_attractor(x, y, heading, attractor, strength=0.1):
     diff = (target_angle - heading + 540) % 360 - 180  # shortest signed rotation
     return heading + diff * strength
 
-"--- Draw the L-system into Shapely geometry ---"
+# ----------------------------------------------------------------
+# Generate L-system geometry
+# ----------------------------------------------------------------
 def draw_l_system_shapely(instructions, angle=ANGLE, step=STEP):
     attractor = (100,300)
     attract_strength = 0.05
@@ -72,7 +79,7 @@ def draw_l_system_shapely(instructions, angle=ANGLE, step=STEP):
     for cmd in instructions:
         if cmd == 'F':
             # slightly steer toward an attractor point
-             if attractor is not None:
+            if attractor is not None:
                 heading = steer_toward_attractor(x, y, heading, attractor, attract_strength)
 
                 # compute endpoint
@@ -106,7 +113,9 @@ def draw_l_system_shapely(instructions, angle=ANGLE, step=STEP):
     return MultiLineString(lines), stem_ids, color_map
 
 
-"--- Generate ---"
+# ----------------------------------------------------------------
+# Main Execution
+# ----------------------------------------------------------------
 axiom = "X"
 angle = ANGLE
 step = STEP
@@ -121,7 +130,9 @@ geometry, stem_ids, color_map = draw_l_system_shapely(instructions, angle, step)
 "--- Apply transformations ---"
 geometry = scale(geometry, xfact=1, yfact=1)
 
-
+# ----------------------------------------------------------------
+# Visualization
+# ----------------------------------------------------------------
 "--- Visualization with Matplotlib including Attractor ---"
 fig, ax = plt.subplots(figsize=(8, 8))
 num_lines = len(geometry.geoms)
