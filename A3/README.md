@@ -98,7 +98,25 @@ All major design parameters (surface resolution, heightmap behavior, panel thres
 ## Examples of variations of the canopy.
 Below are some iterations of the canopy design.
 
-### Version 1
+### Design Variants – Parameter Comparison
+
+| Parameter | Design A | Design B | Design C |
+|---------|---------|---------|---------|
+| Seed | 47 | 47 | 47 |
+| divU / divV | 30 / 30 | 40 / 60 | 20 / 40 |
+| Amplitude | 2.0 | 1.5 | 1.8 |
+| Frequency | 1.3 | 2.0 | 1.5 |
+| Panel threshold | 0.75 | 0.85 | 0.82 |
+| Trunk length | 8 | 8 | 8 |
+| Branch levels | 2 | 2 | 3 |
+| Branch count (lvl 1) | 2–2 | 3–3 | 3–5 |
+| Randomness | 1.0 | 1.0 | 1.0 |
+| Trunk radius | 0.3 | 0.3 | 0.3 |
+| Branch reduction | 0.5 | 0.5 | 0.5 |
+
+### Design A
+
+**Design A** Variation with a canopy with lower surface frequency and evenly spaced supports.
 
 ![View1](images/01_View1.png)
 
@@ -107,7 +125,9 @@ Below are some iterations of the canopy design.
 ![View1](images/01_Settings.png)
 
 
-### Version 2
+### Design B
+
+**Design B** Increased surface resolution and curvature sensitivity, resulting in denser panel openings and a more articulated canopy. 
 
 ![View1](images/02_View1.png)
 
@@ -115,7 +135,9 @@ Below are some iterations of the canopy design.
 
 ![View1](images/02_Settings.png)
 
-### Version 3
+### Design C
+
+**Design C** Reduced surface resolution but increased branching depth, resulting in a heavier structural expression.
 
 ![View1](images/03_View1.png)
 
