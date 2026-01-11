@@ -61,6 +61,7 @@ rgb_wave = wave_to_rgb(sinusoidal_wave_array)
 plt.figure(figsize=(8, 8))
 plt.imshow(rgb_wave)
 plt.axis('off')
+plt.savefig("images/wave_rgb.png", dpi=300, bbox_inches="tight")
 plt.show()
 
 # ----------------------------------------------------------------
@@ -72,4 +73,5 @@ plt.title('Grayscale Wave Pattern (for reference)')
 plt.xlabel('X')
 plt.ylabel('Y')
 plt.colorbar(label='Wave Amplitude')
+plt.savefig("images/wave_grayscale.png", dpi=300, bbox_inches="tight")
 plt.show()
