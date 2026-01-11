@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------
 # Imports 
 # ----------------------------------------------------------------
-
+import os
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -54,6 +54,19 @@ def wave_to_rgb(wave):
 
 # Create RGB array for visualization
 rgb_wave = wave_to_rgb(sinusoidal_wave_array)
+
+
+# ----------------------------------------------------------------
+# Setup for saving images
+# ----------------------------------------------------------------
+
+# --- Resolve paths relative to this script ---
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+IMAGES_DIR = os.path.join(BASE_DIR, "images")
+
+# Ensure images folder exists
+os.makedirs(IMAGES_DIR, exist_ok=True)
+
 
 # ----------------------------------------------------------------
 # Visualize the depth using the RGB-manipulated array
