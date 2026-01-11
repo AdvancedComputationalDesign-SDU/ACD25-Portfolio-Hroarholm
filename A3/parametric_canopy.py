@@ -4,29 +4,6 @@ Assignment 3: Parametric Structural Canopy — Pseudocode Scaffold
 Author: Hroar Holm Bertelsen
 Date: November 2025
 """
-
-""" Ideas for code generation"""
-# Define undulating heightmap based on sinues curves
-
-# Tesselate surface into Voroinoi pattern
-
-# Lift surface up in the air
-
-# Measure distance from canopy to ground
-
-# Define growth logic in 3D space based on distance to canopy
-
-# Define cut off logic for supports
-    # Distance to canopy should be checked and the last length to a node in Voronoi pattern
-
-# Add thickness to supports based on distance to canopy
-# Add thickness to canopy
-
-"""Image generation"""
-# Define viewports
-# Save images at different stages of the process
-
-
 # ------------------------------
 # 1. Imports 
 # ------------------------------
@@ -81,9 +58,13 @@ def uv_grid(divU, divV):
     return U, V
 
 # Generates the heighmap
-def heightmap(U, V, amplitude=1.0, frequency=2.0, phase=0.0):
-    H = amplitude * np.sin(2 * np.pi * frequency * U + phase) * np.cos(2 * np.pi * frequency * V + phase)
-    H += (0.1 * amplitude * np.random.rand(*U.shape) - 0.05)
+def heightmap(U, V, amplitude=1.0, frequency=2.0, phase=0.0, noise_strength=0.0):
+    H = amplitude * np.sin(2 * np.pi * frequency * U + phase) \
+        * np.cos(2 * np.pi * frequency * V + phase)
+
+    if noise_strength > 0:
+        H += noise_strength * (np.random.rand(*U.shape) - 0.5)
+
     return H
 
 # Gets lowerst points of surface
@@ -119,7 +100,7 @@ def nearest_grid_point(pt, grid_points):
             best_dist = d
     return best, best_dist
 
-def mesh_pipe_from_line(line, radius, sides=12):
+def mesh_pipe_from_line(line, radius, sides=24):
     """
     Creates a cylindrical mesh around a line.
     Works as a fast 'MeshPipe' replacement.
@@ -272,7 +253,13 @@ divV = int(divV)
 
 # UV grid and heightmap
 U, V = uv_grid(divU, divV)
-H = heightmap(U, V, amplitude=amplitude, frequency=frequency, phase=phase)
+H = heightmap(
+    U, V,
+    amplitude=amplitude,
+    frequency=frequency,
+    phase=phase,
+    noise_strength=noise_strength
+)
 
 # Scale UV to actual XY size
 X = U * size_x
@@ -690,36 +677,12 @@ for base_pt in treeBases:
 # ---------------------------------- #
 # 7. Output channels                 #
 # ---------------------------------- #
-panel_openings = opening_panels
-regular_quads = base_quads
-quad_colors = colored_quad_colors
+a = surface                             # canopy surface
+b = anchors                             # anchor points
+c = opening_panels                      # curvature-based openings
+d = base_quads                          # base quad panels
+e = colored_quad_colors                 # quad colors
 
-regular_quads = base_quads
-panel_openings = opening_panels
-
-quad_colors = colored_quad_colors
-
-tree_meshes = all_trees_pipes
-tree_mesh_color = all_trees_colors
-
-
-a = surface
-b = anchors
-c = panel_openings
-d = regular_quads
-e = quad_colors
-fractal_supports = all_trees_lines
-tree_meshes = all_trees_pipes
-tree_mesh_color = all_trees_colors
-
-def tessellate_panels_from_grid(point_grid):
-    """Create panels from each cell in a point grid.
-    Options:
-      - Two triangular NURBS patches per quad via `rs.AddSrfPt([a,b,d])`, etc.
-      - Or construct a Mesh (acceptable if the brief allows meshes).
-    Return a list of panel ids, consistent in type.
-    """
-    # TODO: For each cell in the grid, create two triangular or one quad panel
-    # TODO: Use rs.AddSrfPt or mesh construction based on desired output
-    raise NotImplementedError("Convert grid cells into panels (tri or quad)")
-
+fractal_supports = all_trees_lines      
+tree_meshes = all_trees_pipes          
+tree_mesh_color = all_trees_colors     
