@@ -1,106 +1,104 @@
 """
 Assignment 4: Agent-Based Model for Surface Panelization
+Author: Hroar Holm Bertelsen
 
-Author: Your Name
-
-Agent Builder Template
-
-Description:
-Defines the core Agent class and factory methods for constructing an
-agent-based system. Provides a high-level OOP structure for sensing,
-decision-making, and movement, along with a stateful Grasshopper
-GH_ScriptInstance example.
-
-Note: This script is intended to be used within Grasshopper's Python
-scripting component.
+Agent Builder script
 """
 
+# --------------------------------------------------
+# Imports
+# --------------------------------------------------
 
-# -----------------------------------------------------------------------------
-# Imports (extend as needed)
-# -----------------------------------------------------------------------------
-import rhinoscriptsyntax as rs
+import Rhino.Geometry as rg
+import scriptcontext as sc
 import random
-import numpy as np
+import math
 
+# --------------------------------------------------
+# Normalize surface input to BrepFace
+# --------------------------------------------------
 
-# -----------------------------------------------------------------------------
-# Utility functions (optional)
-# -----------------------------------------------------------------------------
-def seed_everything(seed):
-    """Set random seeds for reproducibility."""
-    if seed is not None:
-        random.seed(seed)
-        np.random.seed(seed)
+if isinstance(surface, rg.Brep):
+    brep = surface
+elif isinstance(surface, rg.Surface):
+    brep = rg.Brep.CreateFromSurface(surface)
+else:
+    brep = sc.doc.Objects.Find(surface).Geometry
 
-seed_everything(42)
+# Assume single-face surface
+face = brep.Faces[0]
 
-# -----------------------------------------------------------------------------
-# Core agent class
-# -----------------------------------------------------------------------------
+# Cache domains
+u_dom = face.Domain(0)
+v_dom = face.Domain(1)
+
+# --------------------------------------------------
+# Agent class
+# --------------------------------------------------
+
 class Agent:
-    """Represents a single agent with position, velocity, and state."""
+    def __init__(self, u, v, speed, face, u_dom, v_dom):
+        # Normalized UV position
+        self.u = u
+        self.v = v
 
-    def __init__(self, position, velocity):
-        """
-        Initialize the agent with position and velocity.
-        """
-        self.position = position
-        self.velocity = velocity
-        # TODO: Add any other attributes you need (e.g., id, age, type, etc.).
+        self.face = face
+        self.u_dom = u_dom
+        self.v_dom = v_dom
 
-    def sense(self, signals):
-        """Read environmental signals relevant to the agent."""
-        # TODO: Implement sensing logic based on your chosen signals.
-        pass
+        # Random initial velocity in UV space
+        angle = random.uniform(0, 2 * math.pi)
+        self.du = speed * math.cos(angle)
+        self.dv = speed * math.sin(angle)
 
-    def decide(self):
-        """Decide on actions based on sensed information."""
-        # TODO: Implement decision rules.
-        pass
+        self.alive = True
 
-    def move(self):
-        """Update position according to velocity and rules."""
-        # TODO: Implement movement logic.
-        pass
+    def uv_position(self):
+        return (self.u, self.v)
 
-    def update(self, agents):
-        """Perform one update cycle: sense, decide, and move."""
-        # TODO: Call sense / decide / move here, or structure as you prefer.
-        pass
+    def surface_point(self):
+        """Map normalized UV to 3D surface point"""
+        u_srf = self.u_dom.T0 + self.u * (self.u_dom.T1 - self.u_dom.T0)
+        v_srf = self.v_dom.T0 + self.v * (self.v_dom.T1 - self.v_dom.T0)
+        return self.face.PointAt(u_srf, v_srf)
 
+    def sample_height(self):
+        """Return height (Z) at agent location"""
+        pt = self.surface_point()
+        return pt.Z
 
-# -----------------------------------------------------------------------------
-# Factory for creating agents
-# -----------------------------------------------------------------------------
-def build_agents(num_agents, initial_data=None):
-    """Create and initialize a list of Agent instances."""
-    # TODO: Implement build_agents(...) based on your design.
-    raise NotImplementedError("Implement build_agents(...) based on your design.")
+    
+# --------------------------------------------------
+# Initialization
+# --------------------------------------------------
 
+random.seed(int(seed))
 
-# -----------------------------------------------------------------------------
-# Grasshopper script instance (structural placeholder)
-# -----------------------------------------------------------------------------
-"""Example container for managing agent state in Grasshopper.
+grid_u = int(math.sqrt(agent_count))
+grid_v = grid_u
 
-Use this class to maintain and update agents between recomputations.
-"""
+agents = []
+agent_pts = []
+agent_heights = []
 
-class MyComponent(Grasshopper.Kernel.GH_ScriptInstance):
-    """Manages persistent agent list across Grasshopper runs."""
+for i in range(grid_u):
+    for j in range(grid_v):
+        if len(agents) >= agent_count:
+            break
 
-    def RunScript(self, N:int, reset:bool):
-        """
-        Main entry point called by Grasshopper.
+        u = float(i) / (grid_u - 1)
+        v = float(j) / (grid_v - 1)
 
-        Parameters
-        ----------
-        N : int
-            Number of agents.
-        reset : bool
-            When True, reinitialize agents.
-        """
-        if reset or not hasattr(self, "agents"):
-            self.agents = build_agents(N)
-        return self
+        agent = Agent(u, v, init_speed, face, u_dom, v_dom)
+        agents.append(agent)
+
+        agent_pts.append(agent.surface_point())
+        agent_heights.append(agent.sample_height())
+
+# --------------------------------------------------
+# Outputs
+# --------------------------------------------------
+
+a = agents
+b = agent_pts
+c = agent_heights
