@@ -1,20 +1,4 @@
 """
-Assignment 4: Agent-Based Model for Surface Panelization
-Author: Your Name
-
-Agent Simulator Template
-
-Description:
-This file defines the structural outline for stepping and visualizing
-agents within Grasshopper. No simulation logic is implemented. All behavior
-(update, responding to signals, movement, etc.) must be
-implemented inside your Agent class in `agent_builder.py`.
-
-Note: This script is intended to be used within Grasshopper's Python
-scripting component.
-"""
-
-"""
 Assignment 4: Agent Simulator (Minimal Pass Version)
 
 Author: Hroar Holm Bertelsen
@@ -58,7 +42,14 @@ for agent in agents:
 
 for _ in range(iterations):
     for agent in agents:
-        agent.step(step_size=step_size)
+        agent.step(
+            agents,
+            step_size=step_size,
+            slope_weight=1.0,
+            separation_weight=1.2,
+            min_dist=min_dist
+        )
+
 
 # --------------------------------------------------
 # Main
@@ -69,6 +60,11 @@ agent_points = []
 for agent in agents:
     agent_points.append(agent.surface_point())
 
+trajectories = []
+
+for agent in agents:
+    if len(agent.trail) > 1:
+        trajectories.append(rg.Polyline(agent.trail))
 
 # --------------------------------------------------
 # Outputs
@@ -76,3 +72,4 @@ for agent in agents:
 
 a = agents
 b = agent_points
+c = trajectories
