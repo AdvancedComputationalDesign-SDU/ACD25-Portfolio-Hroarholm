@@ -53,3 +53,10 @@ The behaviour of the pattern is highly sensitive to parameter changes. Adjusting
 ![Grayscale wave pattern](images/wave_grayscale.png)
 
 ---
+
+
+## AI Acknowledgments
+
+AI tools (ChatGPT) were used throughout the assignment for debugging, refactoring, and structuring the code and documentation. Prompting evolved from general troubleshooting toward targeted questions about specific algorithms, RhinoCommon usage, and Object-Oriented Programming structure.
+
+During the development of this assignment, I used AI tools primarily as a technical assistant to help reason about geometry queries, agent behavior formulation, and Python/RhinoScriptSyntax implementation details. Below are examples of prompts used.

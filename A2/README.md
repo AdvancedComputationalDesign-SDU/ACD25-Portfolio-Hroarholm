@@ -13,12 +13,6 @@ search_exclude: false
 
 ![Example Fractal](images/branching.png)
 
-## Objective
-
-In this assignment you will implement a **recursive generator** and enrich it with **geometric influences** that shape how the structure grows in space. You will work with geometric primitives (lines, polylines) using **Shapely** and render the results (e.g., with Matplotlib). The core of the assignment is to **couple formal grammar growth with spatial rules** such as attractor/repulsor points, fields, and collision constraints to produce expressive, controllable patterns.
-
-While the branching or growth approach can be inspired by L-systems, it does not have to be strictly L-system based. You are encouraged to explore recursive generation methods influenced by spatial constraints and geometric rules that govern how the fractal develops and interacts with its environment. This opens opportunities to experiment with recursive branching logic, adaptive scaling, and spatial modulation beyond formal grammar rewriting.
-
 ---
 
 ## Pseudo-code
@@ -82,3 +76,10 @@ This project demonstrates how recursive growth systems can be meaningfully shape
 
 ## Reproducibility
 All outputs are reproducible using the recorded parameters and random seed. Changing the seed or spatial configuration allows systematic exploration of alternative growth patterns while preserving the underlying algorithmic structure.
+
+
+## AI Acknowledgments
+
+AI tools (ChatGPT) were used throughout the assignment for debugging, refactoring, and structuring the code and documentation. Prompting evolved from general troubleshooting toward targeted questions about specific algorithms, RhinoCommon usage, and Object-Oriented Programming structure.
+
+During the development of this assignment, I used AI tools primarily as a technical assistant to help reason about geometry queries, agent behavior formulation, and Python/RhinoScriptSyntax implementation details. Below are examples of prompts used.

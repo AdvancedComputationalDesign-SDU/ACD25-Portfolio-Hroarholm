@@ -140,4 +140,38 @@ Increased step size, leading to faster convergence and tighter aggregation in hi
 
 AI tools (ChatGPT) were used throughout the assignment for debugging, refactoring, and structuring the code and documentation. Prompting evolved from general troubleshooting toward targeted questions about specific algorithms, RhinoCommon usage, and Object-Oriented Programming structure.
 
-All algorithmic decisions, geometric logic, and final implementations were authored, tested, and validated by the student.
+During the development of this assignment, I used AI tools primarily as a technical assistant to help reason about geometry queries, agent behavior formulation, and Python/RhinoScriptSyntax implementation details. Below are examples of prompts used.
+
+--- 
+
+1. Slope Evaluation on a NURBS Surface
+```
+“I have agents moving in normalized UV space on a Rhino NURBS surface. How can I approximate the local slope direction at an agent’s position using finite differences in UV, so the agent can move toward valleys?”
+```
+This was used to derive a method for sampling nearby surface points and estimating slope vectors in UV space.
+
+---
+
+2. Mapping Normalized UV Coordinates to Surface Domain
+```
+“I store agent positions in normalized UV coordinates (0–1). How do I correctly remap these values to the actual surface domain in RhinoCommon so I can evaluate surface points and derivatives?”
+```
+This helped ensure that agent positions correspond meaningfully to locations on the surface geometry.
+
+---
+
+3. Clamping Agent Movement at Surface Edges
+```
+“I want agents to stop moving when they are close to the boundary of a surface. How can I compute the distance to the nearest UV edge and prevent movement if it is below a threshold?”
+```
+This prompt supported the implementation of edge-aware behavior and boundary constraints.
+
+---
+
+4. Agent-to-Agent Distance Checking (Separation Logic)
+```
+“Given a list of agents moving on a surface, how can I compute the minimum distance to nearby agents and use this to prevent agents from clustering too closely?”
+```
+This was used to reason about spacing and separation without implementing full boids-style cohesion or alignment.
+
+---

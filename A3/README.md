@@ -159,9 +159,8 @@ With every base_quad numbered and paired with K numbers for its slope, lets colo
 6.
 I need to add some thickness to my trees and branches. The trunk should have one size, then each branch gets a reduction, that should be controllable. This control, one for the starting trunk size and one for the level of reduction of branches. should be an input, that can also be written in the configuration part of the code. I imagine the trunk size input is radius based and can be controlled with a slider. I imagine the reduction is a multiplyer input, in the range 0.5 to 0.95. I imagine the function using some kind of mesh piping for keeping it simple, yet fast for modelling several branches in an iterative design process. There should also be an option for coloring, so each division gets a new color.
 
-# Additional
-
+### Additional
 Besides prompts like above, ChatGPT have been used to specify how to order the script in a more meaning full way with sections, when I lost a bit of track of my code myself.
 
 ## Aknowledgements
-For now I have used the UV grid generation from my class lecture, so I wish to aknowledge for Özgüç Bertug Çapunaman his work.
+The UV grid generation originates from the lecture and my instructor Özgüç Bertug Çapunaman.
