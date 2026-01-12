@@ -11,30 +11,112 @@ search_exclude: false
 
 [View on GitHub]({{ site.github.repository_url }})
 
-![Example Structural Panelization](images/agent_based.jpg)
+---
 
-## Objective
+## Pseudo-code Overview
 
-In this assignment, you will develop an **agent-based system for surface rationalization** using **Object-Oriented Programming (OOP)** in Python. Building on the surface you generated in Assignment 3 (or a comparable heightmap-driven surface), you will design agents that respond to geometric signals and collectively produce **panelization patterns**. The core idea is that agents move, interact, and make decisions based on how they sample the geometry, and their trajectories and interactions become the basis for a rationalized panelization of that surface.
+The computational pipeline follows the steps below:
 
-Your implementation must incorporate **at least two types of geometric signals** (chosen from curvature, slope, vector fields, scalar fields, and spatial influences) when defining agent behavior. The primary outputs of this assignment are: (1) a rationalized panelization of your surface and (2) simulated agent trajectories and fields that you document and analyze.
+1. Initialize surface and parameters
+The base surface is imported from Assignment 3 and converted into a single Brep face.
+Surface parameter domains (U, V) are cached for normalized mapping.
+Global parameters such as agent count, step size, edge threshold, and iteration count are defined.
+
+2. Define Agent class (Object-Oriented structure)
+An Agent class is defined to encapsulate state and behavior.
+Each agent stores:
+
+Normalized UV position
+
+Reference to the surface face
+
+Surface parameter domains
+
+3. Initialize agents on a regular UV grid
+Agents are placed on a uniform grid in normalized UV space.
+This ensures an even initial distribution before simulation begins.
+Each agent position is mapped to a 3D point on the surface.
+
+4. Map normalized UV positions to surface domain
+Normalized UV coordinates are remapped to the actual surface domain intervals.
+This ensures that agent positions correspond meaningfully to locations on the surface.
+
+5. Sample surface slope (geometric signal)
+At each agent position, local surface slope is approximated using finite differences.
+Nearby surface points are sampled in U and V directions and height differences are computed.
+The resulting slope vector is used as a directional signal.
+
+6. Apply edge constraint (spatial signal)
+Each agent computes its normalized distance to the surface boundaries.
+If the distance falls below a threshold, the agent is frozen and no longer moves.
+This prevents collapse or drift at surface edges.
+
+7. Update agent positions
+Free agents update their UV position by moving against the slope direction, simulating a rain-flow or valley-seeking behavior.
+UV coordinates are clamped to remain within the valid domain.
+
+8. Iterate simulation over time
+The update step is repeated over multiple iterations using a Grasshopper Timer component.
+Over time, agents migrate and cluster based on surface geometry.
+
+9. Extract agent positions and trajectories
+Final agent positions are collected as 3D points on the surface.
+Optional debug geometry (slope vectors, trajectories) is generated for visualization and analysis.
+
+10. Interpret agent distribution as panelization logic
+Areas with higher agent density indicate regions of higher geometric demand.
+These points can be used as input for triangulation or mesh-based panelization in Grasshopper.
 
 ---
 
-## Repository Structure
+## Technical Explanation
 
-```
-A4/
-├── index.md                    # Do not edit front matter or content
-├── README.md                   # Project documentation; Keep front matter, replace the rest with your project documentation
-├── BRIEF.md                    # Assignment brief; Do not edit front matter or content
-├── agent_panelization.gh       # Your grasshopper definition
-├── surface_generator.py        # Your surface_generator implementation
-├── agent_builder.py            # Your agent_builder implementation
-├── agent_simulator.py          # Your agent_simulator implementation
-├── ...                         # Any additional implementation
-└── images/                     # Add diagram, intermediary, and final images here
-    ├── agent_based.png         # Assignment brief image; Do not delete
-    └── ...
-```
+The system uses an agent-based modeling approach where agents act as geometric probes that continuously sample information from a surface and respond through local movement rules. Rather than explicitly defining panels, the model generates a spatial distribution of agents that can be interpreted as an adaptive panelization strategy.
+
+Agents operate in a normalized UV domain, which allows consistent simulation independent of surface scale. At each step, agents query the surface geometry to compute local slope using finite differences. This slope acts as a geometric signal that drives motion, causing agents to migrate toward valleys and ridges where structural or geometric complexity is higher.
+
+A second geometric signal is introduced through spatial boundary constraints. Agents near the surface edges are frozen to stabilize the simulation and prevent unwanted boundary accumulation. This constraint directly modulates agent behavior and affects the final spatial organization.
+
+Over multiple iterations, the interaction between slope-driven motion and boundary constraints produces non-uniform agent densities across the surface. These densities can be interpreted as regions requiring finer or coarser panel resolution. The final agent positions can be triangulated or meshed in Grasshopper to produce a rationalized surface panelization.
+
+All major parameters — agent count, step size, edge threshold, and simulation duration — are exposed as Grasshopper inputs, enabling controlled exploration of design variations.
+
 ---
+
+## Examples of Design Variations
+
+Multiple design outcomes were generated by adjusting simulation parameters while keeping the base surface constant.
+
+| Parameter      | Variant A | Variant B | Variant C |
+| -------------- | --------- | --------- | --------- |
+| Agent count    | 64        | 100       | 170       |
+| Step size      | 0.015     | 0.020     | 0.010     |
+| Edge threshold | 0.05      | 0.08      | 0.05      |
+| Iterations     | 200       | 300       | 400       |
+| Slope weight   | 1.0       | 1.2       | 0.8       |
+
+
+All variants use the same initial surface and UV grid.
+Differences in agent density and clustering are produced solely by changes in behavioral parameters.
+
+### 64 Agents
+
+
+### 100 Agents
+
+
+### 170 Agents
+
+![Base Agents](images/01_UV_Base_Agents.png)
+
+![5 Iterations](/images/5_iterations.png)
+
+![10 Iterations](/images/10_iterations.png)
+
+![15 Iterations](/images/15_iterations.png)
+
+## AI Acknowledgments
+
+AI tools (ChatGPT) were used throughout the assignment for debugging, refactoring, and structuring the code and documentation. Prompting evolved from general troubleshooting toward targeted questions about specific algorithms, RhinoCommon usage, and Object-Oriented Programming structure.
+
+All algorithmic decisions, geometric logic, and final implementations were authored, tested, and validated by the student.

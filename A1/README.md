@@ -11,26 +11,7 @@ search_exclude: false
 
 [View on GitHub]({{ site.github.repository_url }})
 
-![Example Image](images/wave_rgb.png)
-
-## Concept
-
-The goal of this assignment is to create a Python program using NumPy to manipulate a 2-dimensional array and transform a blank canvas into a patterned image. You are asked apply various array operations, introduce randomness, and work with RGB channels to produce full-color images.
-
 ---
-
-## Repository structure
-
-```
-A1/
-├── index.md                    # Do not edit front matter or content
-├── README.md                   # Project documentation; Keep front matter, replace the rest with your project documentation
-├── BRIEF.md                    # Assignment brief; Do not edit front matter or content
-├── pattern_generator.py        # Your code implementation
-└── images/                     # Add diagram, intermediary, and final images here
-    ├── perlin_moire.png        # Assignment brief image; Do not delete
-    └── ...
-```
 
 ## Pseudo-code
 1. Define a two-dimensional coordinate grid over a specified spatial domain.
@@ -62,11 +43,13 @@ The final RGB array is visualized as a full-color image, highlighting the spatia
 
 ### Parametric Behaviour and Design Intent
 The behaviour of the pattern is highly sensitive to parameter changes. Adjusting the emission point shifts the origin of the wave and introduces asymmetry relative to the grid. Modifying the wavelength alters the spacing of the concentric rings, while changing the grid resolution affects the smoothness and level of detail in the output. These parameters demonstrate how simple mathematical relationships can generate a wide range of visual outcomes through computational design.
+
 ---
 
 ## Results 
-![RGB wave pattern](images/wave_rgb.png)
-![Grayscale wave pattern](images/wave_grayscale.png)
 
+![RGB wave pattern](images/wave_rgb.png)
+
+![Grayscale wave pattern](images/wave_grayscale.png)
 
 ---

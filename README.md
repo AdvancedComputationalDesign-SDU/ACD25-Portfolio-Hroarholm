@@ -1,4 +1,4 @@
-[![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/mzR-KFDf)
+<!-- [![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/mzR-KFDf)
 # ACD-E25 Portfolio Template
 
 Use this repository to publish your final portfolio as a cohesive GitHub Pages site bringing together four assignments. The front matter and navigation are pre-wired; you are expected to add/edit the content, images, and code.
@@ -69,7 +69,7 @@ A1/ ... A4/        # One folder per assignment
 - [ ] `_config.yml` has your name and correct `baseurl`.
 - [ ] Changes are committed and pushed; GitHub Pages build is green.
 
----
+--- -->
 
 ## Troubleshooting
 - **Broken links/styles:** confirm `baseurl` matches your repo name and front matter is untouched.
@@ -94,7 +94,7 @@ This portfolio documents four computational design studies developed for Advance
 ## Assignments
 
 ### A1: NumPy Array Manipulation for 2D Pattern Generation
-In A1, I develop a pixel-based pattern generator using NumPy array operations to transform a blank canvas into structured, colorized images. The work focuses on compositional logic (rules + constraints) and controlled randomness to produce a family of variations.
+In A1, I develop a pixel-based pattern generator using NumPy array operations to transform a blank canvas into structured, colorized and greyscale images. The work focuses on compositional logic (rules + constraints).
 
 ### A2: Exploring Fractals through Recursive Geometric Patterns
 In A2, I build a recursive geometric system to explore branching and fractal-like growth. I test how parameter choices (e.g., depth, angle, scaling, and spatial influences) affect density, hierarchy, and legibility of the resulting forms.
@@ -111,6 +111,5 @@ In A4, I use agent behaviors to sample and rationalize a surface into a panelize
 - **Next step:** <one concrete extension you would test next>
 
 ## Contact
-
 - Email: <hrhol22@studen.sdu.dk>
 ```

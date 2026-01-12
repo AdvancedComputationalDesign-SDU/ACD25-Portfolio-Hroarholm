@@ -5,6 +5,10 @@ Author: Hroar Holm Bertelsen
 Agent Builder script
 """
 
+# ------------------------------------------------------------------
+# 1. Imports
+# ------------------------------------------------------------------
+
 import Rhino.Geometry as rg
 import scriptcontext as sc
 import math
