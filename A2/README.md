@@ -77,6 +77,7 @@ This project demonstrates how recursive growth systems can be meaningfully shape
 ## Reproducibility
 All outputs are reproducible using the recorded parameters and random seed. Changing the seed or spatial configuration allows systematic exploration of alternative growth patterns while preserving the underlying algorithmic structure.
 
+---
 
 ## AI Aknowledgement
 AI tools (ChatGPT) were used as a technical co-pilot throughout this assignment.
