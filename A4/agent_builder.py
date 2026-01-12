@@ -213,50 +213,6 @@ for i in range(n):
         agents.append(a)
         agent_pts.append(a.surface_point())
 
-# # ------------------------------------------
-# # DEBUG: sample slope vectors for first agents
-# # ------------------------------------------
-
-# slope_vectors = []
-
-# for agent in agents[:5]:   # only first 5 agents
-#     slope = agent.slope_direction_uv()
-#     slope_vectors.append(slope)
-
-# nearest_distances = []
-
-# for agent in agents:
-#     dists = []
-#     for other in agents:
-#         if agent is other:
-#             continue
-#         dists.append(agent.distance_to(other))
-#     nearest_distances.append(min(dists))
-
-# EDGE_THRESHOLD = edge_threshold  # Grasshopper slider (0.01–0.1)
-
-# edge_agents = []
-# free_agents = []
-
-# for agent in agents:
-#     if agent.near_edge(EDGE_THRESHOLD):
-#         edge_agents.append(agent.surface_point())
-#     else:
-#         free_agents.append(agent.surface_point())
-
-# slope_lines = []
-
-# for agent in agents:
-#     if agent.near_edge(EDGE_THRESHOLD):
-#         continue  # skip frozen agents
-
-#     pt = agent.surface_point()
-#     vec = agent.slope_vector_3d(scale=1.5)
-#     slope_lines.append(rg.Line(pt, pt + vec))
-
-# for agent in agents:
-#     agent.step(step_size=0.015)
-
 # --------------------------------------------------
 # Outputs
 # --------------------------------------------------
