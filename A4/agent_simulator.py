@@ -14,42 +14,65 @@ Note: This script is intended to be used within Grasshopper's Python
 scripting component.
 """
 
-# -----------------------------------------------------------------------------
-# Imports (extend as needed)
-# -----------------------------------------------------------------------------
-import rhinoscriptsyntax as rs
+"""
+Assignment 4: Agent Simulator (Minimal Pass Version)
+
+Author: Hroar Holm Bertelsen
+
+Description:
+Updates agents over time using geometric signals:
+- slope (heightmap gradient)
+- separation (agent-agent spacing)
+Outputs agent trajectories for panelization logic.
+"""
+
+# --------------------------------------------------
+# Imports
+# --------------------------------------------------
+
+import Rhino.Geometry as rg
+import scriptcontext as sc
 import numpy as np
+import math
 
-# -----------------------------------------------------------------------------
-# Retrieve agents from upstream Grasshopper component
-# -----------------------------------------------------------------------------
-# Expected pattern (example):
-# agents = x.agents  # where `x` is a stateful component instance
-# Replace `x` and the attribute name with whatever your GH setup uses.
+# --------------------------------------------------
+# Persistent storage (Grasshopper)
+# --------------------------------------------------
 
-agents = x.agents # access agents from the agents_builder component
+if reset or not hasattr(sc.sticky, "agents"):
+    sc.sticky["agents"] = agents
 
-# -----------------------------------------------------------------------------
-# Step simulation (delegated to Agent methods)
-# -----------------------------------------------------------------------------
-# Suggested loop structure:
-if agents is not None:
-    for agent in agents:
-        agent.update(agents)
+agents_sim = sc.sticky["agents"]
 
-# -----------------------------------------------------------------------------
-# Visualization placeholders (Rhino + NumPy-friendly)
-# -----------------------------------------------------------------------------
-# Minimal outputs:
-# - Points representing agent positions
-# - Vectors, polylines, trails, or any custom debug geometry
+# --------------------------------------------------
+# Freeze edge agents once
+# --------------------------------------------------
 
-P = []  # list of position points (e.g., rs.AddPoint(...))
-V = []  # list of velocity vectors or other debug geometry
-
-# Example geometry generation (uncomment and adapt):
 for agent in agents:
-    P.append(rs.AddPoint(agent.position[0], agent.position[1], agent.position[2]))
-    # create a line or vector visualization from pos in direction vel
-    end = agent.position + agent.velocity
-    V.append(rs.AddLine(rs.coerce3dpoint(pos), rs.coerce3dpoint(end)))
+    if agent.near_edge(edge_threshold):
+        agent.frozen = True
+
+# --------------------------------------------------
+# Simulation loop
+# --------------------------------------------------
+
+for _ in range(iterations):
+    for agent in agents:
+        agent.step(step_size=step_size)
+
+# --------------------------------------------------
+# Main
+# --------------------------------------------------
+
+agent_points = []
+
+for agent in agents:
+    agent_points.append(agent.surface_point())
+
+
+# --------------------------------------------------
+# Outputs
+# --------------------------------------------------
+
+a = agents
+b = agent_points
