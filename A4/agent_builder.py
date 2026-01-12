@@ -25,7 +25,7 @@ u_dom = face.Domain(0)
 v_dom = face.Domain(1)
 
 # --------------------------------------------------
-# Agent class (NO BEHAVIOR)
+# Agent class
 # --------------------------------------------------
 
 class Agent:
@@ -35,6 +35,9 @@ class Agent:
         self.face = face
         self.u_dom = u_dom
         self.v_dom = v_dom
+        self.trail = []
+
+        self.frozen = False
 
     def surface_point(self):
         u_srf = self.u_dom.T0 + self.u * (self.u_dom.T1 - self.u_dom.T0)
@@ -126,30 +129,68 @@ class Agent:
         vec.Unitize()
         return vec * scale
 
-    def step(self, step_size=0.02, slope_weight=1.0):
-        """
-        Move agent in UV space according to slope.
-        """
+    def step(self, agents, step_size=0.02, slope_weight=1.0, separation_weight=1.0, min_dist=0.05):
 
-        # Do nothing if frozen
-        if self.near_edge(EDGE_THRESHOLD):
+        if self.frozen:
             return
 
-        # Sample slope
+        # --- slope force ---
         slope = self.sample_slope_uv()
+        if slope.Length > 1e-6:
+            slope.Unitize()
+        slope_vec = rg.Vector2d(-slope.X, -slope.Y)  # downhill
 
-        if slope.Length < 1e-6:
+        # --- separation force ---
+        sep = self.separation_force_uv(agents, min_dist)
+
+        # --- combine forces ---
+        move = rg.Vector2d(
+            slope_weight * slope_vec.X + separation_weight * sep.X,
+            slope_weight * slope_vec.Y + separation_weight * sep.Y
+        )
+
+        if move.Length < 1e-6:
             return
 
-        slope.Unitize()
+        move.Unitize()
 
-        # Move AGAINST slope = flow to valleys
-        self.u -= slope.X * step_size * slope_weight
-        self.v -= slope.Y * step_size * slope_weight
+        self.u += move.X * step_size
+        self.v += move.Y * step_size
 
         # Clamp UV
         self.u = max(0.0, min(1.0, self.u))
         self.v = max(0.0, min(1.0, self.v))
+
+        self.trail.append(self.surface_point())
+
+    def separation_force_uv(self, agents, min_dist):
+        """
+        Computes repulsion vector in UV space
+        based on nearby agents.
+        """
+        fx = 0.0
+        fy = 0.0
+        count = 0
+
+        for other in agents:
+            if other is self:
+                continue
+
+            du = self.u - other.u
+            dv = self.v - other.v
+            dist = math.sqrt(du*du + dv*dv)
+
+            if dist < min_dist and dist > 1e-6:
+                fx += du / dist
+                fy += dv / dist
+                count += 1
+
+        if count == 0:
+            return rg.Vector2d(0, 0)
+
+        v = rg.Vector2d(fx, fy)
+        v.Unitize()
+        return v    
 # --------------------------------------------------
 # Build regular grid
 # --------------------------------------------------
