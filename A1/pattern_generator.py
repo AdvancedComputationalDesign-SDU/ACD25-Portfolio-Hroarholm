@@ -1,57 +1,90 @@
-# Assignment 1: NumPy Array Manipulation for 2D Pattern Generation
-
-# Instructions:
-# - Write your code to generate patterns using NumPy.
-# - Use comments to explain your logic and the methods you're using.
-# - Feel free to be creative and explore different techniques.
-
+# ----------------------------------------------------------------
+# Imports 
+# ----------------------------------------------------------------
+import os
 import numpy as np
 import matplotlib.pyplot as plt
 
-# Initialize your canvas (e.g., a 2D array filled with zeros)
-# You can adjust the size as needed
-canvas_height = 100  # Modify as desired
-canvas_width = 100   # Modify as desired
-canvas = np.zeros((canvas_height, canvas_width))
+# ----------------------------------------------------------------
+# Parameters for the sinusoidal wave pattern
+# ----------------------------------------------------------------
+center_x, center_y = 2, 1  # Emission point (center)
+wavelength = 0.5  # Wavelength of the waves
+num_waves = 10  # Approximate number of waves (controlled by extent/wavelength)
+grid_size = 400  # Size of the 2D array (square grid)
 
-# Apply array manipulations to create a pattern
-# Suggestions:
-# - Use slicing and indexing to create stripes or checkerboards
-# - Use mathematical functions to create gradients
-# - Combine multiple patterns
 
-# Example (you can modify or remove this):
-# Create horizontal stripes
-# for i in range(0, canvas_height, 20):
-#     canvas[i:i+10, :] = 255  # Assign a value to create a stripe
+# ----------------------------------------------------------------
+# Create a meshgrid for x and y coordinates
+# ----------------------------------------------------------------
+x = np.linspace(-4, 4, grid_size)
+y = np.linspace(-4, 4, grid_size)
+X, Y = np.meshgrid(x, y)
 
-# Introduce randomness to add variability
-# Suggestions:
-# - Use np.random functions to add noise
-# - Randomly change pixel values within certain regions
+# Calculate radial distance from the emission point
+r = np.sqrt((X - center_x)**2 + (Y - center_y)**2)
 
-# Example:
-# noise = np.random.randint(0, 50, (canvas_height, canvas_width))
-# canvas = canvas + noise
+# Generate the sinusoidal wave pattern: sin(2π r / λ)
+# This creates concentric waves emanating from the center
+wave_pattern = np.sin(2 * np.pi * r / wavelength)
 
-# Work with RGB channels
-# Convert your 2D canvas to a 3D array for RGB representation
-# Assign different colors to different parts of your pattern
+# The resulting 2D NumPy array representing the sinusoidal wave pattern
+sinusoidal_wave_array = wave_pattern
 
-# Example:
-# canvas_rgb = np.stack((canvas, canvas, canvas), axis=2)
+# Function to manipulate RGB channels for depth visualization
+# - High values (peaks): warmer colors (more red)
+# - Low values (troughs): cooler colors (more blue)
+# - This simulates 'depth' with color gradient
+def wave_to_rgb(wave):
+    # Normalize wave to 0-1 range for RGB (wave is -1 to 1)
+    norm_wave = (wave + 1) / 2  # 0 (trough/deep) to 1 (peak/shallow)
+    
+    # Manipulate channels:
+    # Red: increases with height (shallow)
+    r = norm_wave
+    
+    # Green: subtle in the middle for transition
+    g = 0.3 * norm_wave
+    
+    # Blue: increases with depth (low height)
+    b = 1 - norm_wave
+    
+    # Stack into RGB array (0-1 float)
+    return np.stack([r, g, b], axis=-1)
 
-# Assign colors
-# canvas_rgb[:, :, 0] = 255  # Modify the red channel
-# canvas_rgb[:, :, 1] = canvas_rgb[:, :, 1] * 0.5  # Modify the green channel
+# Create RGB array for visualization
+rgb_wave = wave_to_rgb(sinusoidal_wave_array)
 
-# Ensure your array values are within the valid range (0-255)
-# canvas_rgb = np.clip(canvas_rgb, 0, 255)
 
-# Visualize and save your image
-# plt.imshow(canvas_rgb.astype(np.uint8))
-# plt.axis('off')  # Hide axis
-# plt.show()
+# ----------------------------------------------------------------
+# Setup for saving images
+# ----------------------------------------------------------------
 
-# Save the image to the images folder
-# plt.savefig('images/pattern_example.png', bbox_inches='tight', pad_inches=0)
+# --- Resolve paths relative to this script ---
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+IMAGES_DIR = os.path.join(BASE_DIR, "images")
+
+# Ensure images folder exists
+os.makedirs(IMAGES_DIR, exist_ok=True)
+
+
+# ----------------------------------------------------------------
+# Visualize the depth using the RGB-manipulated array
+# ----------------------------------------------------------------
+plt.figure(figsize=(8, 8))
+plt.imshow(rgb_wave)
+plt.axis('off')
+plt.savefig("images/wave_rgb.png", dpi=300, bbox_inches="tight")
+plt.show()
+
+# ----------------------------------------------------------------
+# Grayscale version for comparison
+# ----------------------------------------------------------------
+plt.figure(figsize=(8, 8))
+plt.imshow(sinusoidal_wave_array, cmap='gray', extent=(-5, 5, -5, 5))
+plt.title('Grayscale Wave Pattern (for reference)')
+plt.xlabel('X')
+plt.ylabel('Y')
+plt.colorbar(label='Wave Amplitude')
+plt.savefig("images/wave_grayscale.png", dpi=300, bbox_inches="tight")
+plt.show()

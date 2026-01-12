@@ -1,9 +1,9 @@
 """
 Assignment 4: Agent-Based Model for Surface Panelization
 
-Author: Your Name
+Author: Hroar Holm Bertelsen
 
-Surface Generator Template
+Surface Generator script
 
 Description:
 This file defines the structural outline for generating or preprocessing
@@ -13,49 +13,112 @@ Note: This script is intended to be used within Grasshopper's Python
 scripting component.
 """
 
-# -----------------------------------------------------------------------------
-# Imports (extend as needed)
-# -----------------------------------------------------------------------------
-import rhinoscriptsyntax as rs
+# ------------------------------------------------------------------
+# 1. Imports
+# ------------------------------------------------------------------
+
+import Rhino.Geometry as rg
 import numpy as np
 
+# ------------------------------------------------------------------
+# 2. Heightmap generation
+# ------------------------------------------------------------------
 
-# -----------------------------------------------------------------------------
-# 1. Heightmap Generation
-# -----------------------------------------------------------------------------
-def generate_heightmap(shape=(50, 50), params=None):
-    """Create a heightmap array from input data."""
-    # TODO: generate and return a NumPy heightmap array
-    raise NotImplementedError("Implement generate_heightmap(...)")
+def generate_heightmap(shape, amplitude, frequency, phase, noise_strength=0.0):
+    """Generate a sinusoidal heightmap with noise."""
+    u = np.linspace(0, 1, shape[0])
+    v = np.linspace(0, 1, shape[1])
+    U, V = np.meshgrid(u, v)
+
+    H = amplitude * np.sin(2*np.pi*frequency*U + phase) * \
+                     np.cos(2*np.pi*frequency*V + phase)
+
+    # optional noise (controlled externally)
+    if noise_strength > 0:
+        H += noise_strength * (np.random.rand(*H.shape) - 0.5)
+
+    return H
+
+# ------------------------------------------------------------------
+# 3. Create flat XY grid
+# ------------------------------------------------------------------
+
+def sample_surface_uniform(shape=(50,50)):
+    size_x = float(sizeX)
+    size_y = float(sizeY)
+
+    u = np.linspace(0, size_x, shape[0])
+    v = np.linspace(0, size_y, shape[1])
+
+    grid = []
+    for i in range(shape[0]):
+        row = []
+        for j in range(shape[1]):
+            row.append(rg.Point3d(u[i], v[j], 0))
+        row = row
+        grid.append(row)
+
+    return np.array(grid)
 
 
-# -----------------------------------------------------------------------------
-# 2. Uniform Surface Sampling
-# -----------------------------------------------------------------------------
-def sample_surface_uniform(surface, shape=(50, 50)):
-    """Sample a surface uniformly in its UV domain."""
-    # TODO: generate UV grid, evaluate surface points, return as NumPy array
-    raise NotImplementedError("Implement sample_surface_uniform(...)")
+# ------------------------------------------------------------------
+# 4. Apply heightmap to Z-values
+# ------------------------------------------------------------------
+
+def manipulate_point_grid(heightmap, point_grid, scalar=1.0):
+    grid = point_grid.copy()
+    rows, cols = grid.shape
+
+    if heightmap is None:
+        raise ValueError("Heightmap is None — check U, V inputs")
+
+    for i in range(rows):
+        for j in range(cols):
+            grid[i, j].Z += heightmap[i, j] * scalar
+    
+    return grid
 
 
-# -----------------------------------------------------------------------------
-# 3. Grid Manipulation (apply heightmap to grid)
-# -----------------------------------------------------------------------------
-def manipulate_point_grid(heightmap, point_grid, scalar):
-    """Apply heightmap values to a sampled point grid."""
-    # TODO: modify point_grid using heightmap and return it
-    raise NotImplementedError("Implement manipulate_point_grid(...)")
+# ------------------------------------------------------------------
+# 5. Build surface using correct RhinoCommon API
+# ------------------------------------------------------------------
 
-
-# -----------------------------------------------------------------------------
-# 4. Build Surface from Manipulated Points
-# -----------------------------------------------------------------------------
 def build_surface(point_grid):
-    """Build a surface from a point grid."""
-    # TODO: use Rhino.Geometry to construct a surface from the point grid
-    raise NotImplementedError("Implement build_surface(...)")
+    rows, cols = point_grid.shape
 
-heightmap = generate_heightmap(shape=(U,V))
-pt_grid = sample_surface_uniform(surface, shape=(U,V))
-manip_pt_grid = manipulate_point_grid(heightmap, pt_grid, scalar)
-manip_srf = build_surface(pt_grid)
+    flat = point_grid.reshape(rows * cols).tolist()
+
+    surf = rg.NurbsSurface.CreateThroughPoints(
+        flat,
+        rows,
+        cols,
+        3, 3,
+        False, False
+    )
+
+    return surf
+
+
+# ------------------------------------------------------------------
+# 6. Execution
+# ------------------------------------------------------------------
+U = int(U)
+V = int(V)
+
+H = generate_heightmap((U, V), amplitude, frequency, phase, noise_strength)
+P = sample_surface_uniform((U, V))
+Pm = manipulate_point_grid(H, P, scalar)
+surface = build_surface(Pm)
+
+U_norm = np.linspace(0, 1, U)
+V_norm = np.linspace(0, 1, V)
+
+# ------------------------------------------------------------------
+# 7. Outputs
+# ------------------------------------------------------------------
+
+a = surface
+b = H
+c = (U, V)
+d = (surface.Domain(0), surface.Domain(1))
+e = (U_norm, V_norm)

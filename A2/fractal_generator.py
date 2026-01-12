@@ -1,87 +1,155 @@
 """
 Assignment 2: Fractal Generator
 
-Author: Your Name
+Author: Hroar Holm Bertelsen
 
 Description:
 This script generates fractal patterns using recursive functions and geometric transformations.
 """
-
-# Import necessary libraries
+# ----------------------------------------------------------------
+# Imports
+# ----------------------------------------------------------------
 import math
 import matplotlib.pyplot as plt
-from shapely.geometry import LineString
-from shapely.affinity import rotate, translate
+from shapely.geometry import LineString, MultiLineString
+from shapely.affinity import scale
+from shapely.geometry import box  
 import random
 
-# Global list to store all line segments
-line_list = []
+# ----------------------------------------------------------------
+# Parameters
+# ----------------------------------------------------------------
+SEED = 28
+iterations = 5      # L-system depth
+ANGLE = 45          # turning angle
+STEP = 6            # step length
 
-def generate_fractal(start_point, angle, length, depth, max_depth, angle_change, length_scaling_factor):
-    """
-    Recursive function to generate fractal patterns.
+OBSTACLE_BOUNDS = (-2, 12, 4, 14)  # x_min, y_min, x_max, y_max
 
-    Parameters:
-    - start_point: Tuple (x, y), starting coordinate.
-    - angle: Float, current angle in degrees.
-    - length: Float, length of the current line segment.
-    - depth: Int, current recursion depth.
-    - max_depth: Int, maximum recursion depth.
-    - angle_change: Float, angle change at each recursion.
-    - length_scaling_factor: Float, scaling factor for the length.
-    """
-    if depth > max_depth:
+random.seed(SEED)
+
+# ----------------------------------------------------------------
+# Helper functions
+# ----------------------------------------------------------------
+
+# --- Define constraint box ---
+constraint_box = box(*OBSTACLE_BOUNDS)
+
+# --- Return a new heading slightly adjusted toward the attractor point.---
+def steer_toward_attractor(x, y, heading, attractor, strength=0.1):
+    ax, ay = attractor
+    dx, dy = ax - x, ay - y
+    target_angle = math.degrees(math.atan2(dy, dx))
+    diff = (target_angle - heading + 540) % 360 - 180  # shortest signed rotation
+    return heading + diff * strength
+
+# --- Recursive branch growth with obstacle avoidance ---
+def grow_branch(x, y, heading, step, depth, lines, stem_id):
+    if depth == 0:
         return
 
-    # Calculate the end point of the line segment
-    end_x = start_point[0] + length * math.cos(math.radians(angle))
-    end_y = start_point[1] + length * math.sin(math.radians(angle))
-    end_point = (end_x, end_y)
+    # steer toward attractor
+    heading = steer_toward_attractor(x, y, heading, attractor, attract_strength)
 
-    # Create a line segment using Shapely
-    line = LineString([start_point, end_point])
-    line_list.append(line)
+    # compute endpoint
+    rad = math.radians(heading)
+    step_variation = step * random.uniform(0.85, 1.15)
+    x2 = x + step_variation * math.cos(rad)
+    y2 = y + step_variation * math.sin(rad)
 
-    # Update the length for the next recursion
-    new_length = length * length_scaling_factor
+    candidate = LineString([(x, y), (x2, y2)])
 
-    # Increment depth
-    next_depth = depth + 1
+    # obstacle pruning
+    if candidate.intersects(constraint_box):
+        return
 
-    # Recursive calls for branches
-    generate_fractal(end_point, angle + angle_change, new_length, next_depth, max_depth, angle_change, length_scaling_factor)
-    generate_fractal(end_point, angle - angle_change, new_length, next_depth, max_depth, angle_change, length_scaling_factor)
+    lines.append((candidate, stem_id))
 
-# Main execution
-if __name__ == "__main__":
-    # Parameters
-    start_point = (0, 0)
-    initial_angle = 90
-    initial_length = 100
-    recursion_depth = 0
-    max_recursion_depth = 5
-    angle_change = 30
-    length_scaling_factor = 0.7
+    # branch angles
+    angle_variation = ANGLE + random.uniform(-2, 2)
 
-    # Clear the line list
-    line_list.clear()
+    # recursive calls
+    grow_branch(x2, y2, heading + angle_variation, step * 0.75, depth - 1, lines, stem_id + 1)
+    grow_branch(x2, y2, heading - angle_variation, step * 0.75, depth - 1, lines, stem_id + 1)
 
-    # Generate the fractal
-    generate_fractal(start_point, initial_angle, initial_length, recursion_depth, max_recursion_depth, angle_change, length_scaling_factor)
+# ----------------------------------------------------------------
+# Main Execution
+# ----------------------------------------------------------------
 
-    # Visualization
-    fig, ax = plt.subplots()
-    for line in line_list:
-        x, y = line.xy
-        ax.plot(x, y, color='green', linewidth=1)
+attractor = (5, 20)
+attract_strength = 0.08
 
-    # Optional: Customize the plot
-    ax.set_aspect('equal')
-    plt.axis('off')
-    plt.show()
+lines = []
+grow_branch(
+    x=0.0,
+    y=0.0,
+    heading=90.0,
+    step=STEP,
+    depth=iterations,
+    lines=lines,
+    stem_id=0
+)
 
-    # Save the figure
-    fig.savefig('images/fractal_tree.png', dpi=300, bbox_inches='tight')
+geometry = MultiLineString([line for line, _ in lines])
+stem_ids = [sid for _, sid in lines]
+max_stem_id = max(stem_ids) if stem_ids else 1
 
-    # Repeat the process with different parameters for additional fractals
-    # ...
+# --- Apply transformations ---
+geometry = scale(geometry, xfact=1, yfact=1)
+
+
+# ----------------------------------------------------------------
+# Visualization
+# ----------------------------------------------------------------
+
+# --- Visualization with Matplotlib including Attractor ---
+fig, ax = plt.subplots(figsize=(8, 8))
+num_lines = len(geometry.geoms)
+for line, stem_id in zip(geometry.geoms, stem_ids):
+    x, y = line.xy
+    color = plt.cm.viridis(stem_id / max_stem_id)
+    ax.plot(x, y, color=color, linewidth=1.2)
+
+# ---Draw forbidden box---
+x_min, y_min, x_max, y_max = constraint_box.bounds
+ax.add_patch(plt.Rectangle((x_min, y_min),
+                           x_max - x_min,
+                           y_max - y_min,
+                           color='red', alpha=0.3, label='Forbidden zone'))
+
+
+
+# --- Draw attractor point --- 
+ax.plot(attractor[0], attractor[1], 'yo', markersize=8, label='Attractor')
+ax.set_aspect("equal", "datalim")
+ax.axis("off")
+
+# --- Expand plot bounds to avoid cropping attractor ---
+xmin, xmax = ax.get_xlim()
+ymin, ymax = ax.get_ylim()
+
+padding = 1  # padding space 
+ax.set_xlim(xmin, xmax)
+ax.set_ylim(ymin, ymax + padding)
+
+# --- Final clean export ---
+ax.set_aspect("equal", adjustable="box")
+ax.axis("off")
+plt.margins(0)
+
+# --- Resolve paths relative to this script ---
+import os
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+IMAGES_DIR = os.path.join(BASE_DIR, "images")
+
+# Ensure images folder exists
+os.makedirs(IMAGES_DIR, exist_ok=True)
+
+# ---Save tightly cropped, high-resolution image ---
+plt.savefig(
+    os.path.join(IMAGES_DIR, "fractal_output.png"),
+    bbox_inches="tight",
+    pad_inches=0,
+    dpi=300
+)
+plt.close(fig)
