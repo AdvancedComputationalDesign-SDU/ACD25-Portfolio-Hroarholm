@@ -55,8 +55,15 @@ The behaviour of the pattern is highly sensitive to parameter changes. Adjusting
 ---
 
 
-## AI Acknowledgments
+## AI Aknowledgement
+AI tools (ChatGPT) were used as a coding companion throughout this assignment.
 
-AI tools (ChatGPT) were used throughout the assignment for debugging, refactoring, and structuring the code and documentation. Prompting evolved from general troubleshooting toward targeted questions about specific algorithms, RhinoCommon usage, and Object-Oriented Programming structure.
+It assisted with:
 
-During the development of this assignment, I used AI tools primarily as a technical assistant to help reason about geometry queries, agent behavior formulation, and Python/RhinoScriptSyntax implementation details. Below are examples of prompts used.
+* overall script structure and clean sectioning
+* choosing & tuning the mathematical formulation of concentric waves
+* designing the RGB false-color depth visualization logic
+* figuring out proper normalization and channel manipulation for visual effect
+* handling file paths, image export, and matplotlib polish
+
+Prompting started quite general ("how to make nice looking wave interference?") and became increasingly specific about numpy operations, rgb channel mapping, and tight image export settings.

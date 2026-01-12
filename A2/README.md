@@ -78,8 +78,13 @@ This project demonstrates how recursive growth systems can be meaningfully shape
 All outputs are reproducible using the recorded parameters and random seed. Changing the seed or spatial configuration allows systematic exploration of alternative growth patterns while preserving the underlying algorithmic structure.
 
 
-## AI Acknowledgments
+## AI Aknowledgement
+AI tools (ChatGPT) were used as a technical co-pilot throughout this assignment.
+They helped with:
 
-AI tools (ChatGPT) were used throughout the assignment for debugging, refactoring, and structuring the code and documentation. Prompting evolved from general troubleshooting toward targeted questions about specific algorithms, RhinoCommon usage, and Object-Oriented Programming structure.
+* overall code architecture & modular structuring.
+* refactoring messy recursive logic.
+* debugging Shapely geometry operations.
+* designing clean parameter handling and coordinate math.
 
-During the development of this assignment, I used AI tools primarily as a technical assistant to help reason about geometry queries, agent behavior formulation, and Python/RhinoScriptSyntax implementation details. Below are examples of prompts used.
+Prompting progressed from broad "how to structure this?" to very specific questions about recursion depth, angle variation, obstacle pruning, and matplotlib export finesse.
